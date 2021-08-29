@@ -44,6 +44,7 @@ deploy_snapshot:
   script:
     - mvn deploy -DskipTests=true -Pdocker -Dmaven.install.skip=true
   allow_failure: false
+  when: manual
 
 
 #release:
