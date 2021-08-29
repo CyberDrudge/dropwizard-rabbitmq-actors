@@ -53,20 +53,47 @@
         </developer>
     </developers>
 
-    <ciManagement>
-        <system>Travis CI</system>
-        <url>https://travis-ci.org/santanusinha/dropwizard-rabbitmq-actors</url>
-    </ciManagement>
+    <repositories>
+        <repository>
+            <id>clojars</id>
+            <name>Clojars repository</name>
+            <url>https://clojars.org/repo</url>
+        </repository>
+        <repository>
+            <id>phonepe-releases</id>
+            <name>releases</name>
+            <url>http://artifactory.phonepe.com/content/repositories/releases</url>
+        </repository>
+        <repository>
+            <id>phonepe-snapshots</id>
+            <name>snapshots</name>
+            <url>http://artifactory.phonepe.com/content/repositories/snapshots</url>
+        </repository>
+        <repository>
+            <id>easy-fsm-mvn-repo</id>
+            <url>https://raw.github.com/koushikr/easy-fsm/mvn-repo/</url>
+        </repository>
+
+    </repositories>
+
+<!--    <ciManagement>-->
+<!--        <system>Travis CI</system>-->
+<!--        <url>https://travis-ci.org/santanusinha/dropwizard-rabbitmq-actors</url>-->
+<!--    </ciManagement>-->
 
     <distributionManagement>
         <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <id>phonepe-snapshots</id>
+            <url>http://artifactory.phonepe.com/content/repositories/snapshots</url>
         </snapshotRepository>
-        <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
+<!--        <snapshotRepository>-->
+<!--            <id>ossrh</id>-->
+<!--            <url>https://oss.sonatype.org/content/repositories/snapshots</url>-->
+<!--        </snapshotRepository>-->
+<!--        <repository>-->
+<!--            <id>ossrh</id>-->
+<!--            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>-->
+<!--        </repository>-->
     </distributionManagement>
 
 
