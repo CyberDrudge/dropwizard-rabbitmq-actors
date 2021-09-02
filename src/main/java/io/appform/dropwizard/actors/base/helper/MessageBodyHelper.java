@@ -21,7 +21,7 @@ public class MessageBodyHelper {
                                     final AMQP.BasicProperties properties) throws IOException {
 
         log.info("Compressed message size: {}", message.length);
-        if (properties.getHeaders().containsKey(COMPRESSION_TYPE)) {
+        if (properties.getHeaders() != null && properties.getHeaders().containsKey(COMPRESSION_TYPE)) {
             val body = compressionProvider.decompress(message, (CompressionAlgorithm) properties.getHeaders()
                     .get(COMPRESSION_TYPE));
             log.info("Uncompressed message size: {}", body.length);
@@ -34,7 +34,7 @@ public class MessageBodyHelper {
                                   final AMQP.BasicProperties properties) throws IOException {
 
         log.info("Uncompressed message size: {}", message.length);
-        if (properties.getHeaders().containsKey(COMPRESSION_TYPE)) {
+        if (properties.getHeaders() != null && properties.getHeaders().containsKey(COMPRESSION_TYPE)) {
             val body = compressionProvider.compress(message, (CompressionAlgorithm) properties.getHeaders()
                     .get(COMPRESSION_TYPE));
             log.info("Compressed message size: {}", body.length);
