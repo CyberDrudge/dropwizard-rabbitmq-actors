@@ -173,6 +173,9 @@ public class UnmanagedPublisher<Message>{
                                      final AMQP.BasicProperties properties) throws Exception {
 
         var byteMessage = mapper().writeValueAsBytes(message);
+        if (compressionEnabled) {
+            log.info("Message for compression: {}", message.toString());
+        }
         return messageBodyHelper.compressMessage(byteMessage, properties);
     }
 }

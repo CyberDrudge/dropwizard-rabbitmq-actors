@@ -3,6 +3,7 @@ package io.appform.dropwizard.actors.base.helper;
 import com.google.common.collect.Maps;
 import com.rabbitmq.client.AMQP;
 import io.appform.dropwizard.actors.actor.ActorConfig;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 import java.util.Map;
@@ -10,6 +11,7 @@ import java.util.Map;
 import static io.appform.dropwizard.actors.utils.MessageHeaders.COMPRESSION_TYPE;
 import static io.appform.dropwizard.actors.utils.MessageHeaders.DELAY;
 
+@Slf4j
 public class PropertiesHelper {
 
     private final ActorConfig config;
@@ -36,6 +38,7 @@ public class PropertiesHelper {
         if (properties.getHeaders() == null) {
             // have to do this since AMQP.BasicProperties doesn't have any setter methods
             val headers = addCompressionHeader(Maps.newHashMap(), compressionEnabled);
+            log.info("Added compression Headers: {}", compressionEnabled);
             return new AMQP.BasicProperties.Builder()
                     .contentType(properties.getContentType())
                     .contentEncoding(properties.getContentEncoding())
