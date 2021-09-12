@@ -29,6 +29,7 @@ public class PropertiesHelper {
 
         return properties.headers(delayHeaders)
                 .deliveryMode(2)
+                .contentEncoding(compressionEnabled ? "gzip" : null)
                 .expiration(ttlDelayEnabled ? String.valueOf(delayMilliseconds) : null)
                 .build();
     }
@@ -41,7 +42,7 @@ public class PropertiesHelper {
             log.info("Added compression Headers: {}", compressionEnabled);
             return new AMQP.BasicProperties.Builder()
                     .contentType(properties.getContentType())
-                    .contentEncoding(properties.getContentEncoding())
+                    .contentEncoding(compressionEnabled ? "gzip" : properties.getContentEncoding())
                     .headers(headers)
                     .deliveryMode(properties.getDeliveryMode())
                     .priority(properties.getPriority())

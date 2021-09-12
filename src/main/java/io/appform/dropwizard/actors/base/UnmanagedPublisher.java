@@ -2,7 +2,6 @@ package io.appform.dropwizard.actors.base;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.MessageProperties;
@@ -11,7 +10,6 @@ import io.appform.dropwizard.actors.actor.DelayType;
 import io.appform.dropwizard.actors.base.helper.MessageBodyHelper;
 import io.appform.dropwizard.actors.base.helper.PropertiesHelper;
 import io.appform.dropwizard.actors.base.utils.NamingUtils;
-import io.appform.dropwizard.actors.compression.CompressionProvider;
 import io.appform.dropwizard.actors.connectivity.RMQConnection;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
