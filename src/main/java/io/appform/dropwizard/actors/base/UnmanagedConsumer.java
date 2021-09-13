@@ -27,6 +27,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.function.Function;
 
+import static io.appform.dropwizard.actors.utils.MessageHeaders.COMPRESSION_TYPE;
+
 @Slf4j
 public class UnmanagedConsumer<Message> {
 
@@ -149,7 +151,11 @@ public class UnmanagedConsumer<Message> {
     private Message createMessage(final byte[] body,
                                   AMQP.BasicProperties properties) throws Exception {
         val modifiedMessageBody = messageBodyHelper.decompressMessage(body, properties);
-        return mapper.readValue(modifiedMessageBody, clazz);
+        val message = mapper.readValue(modifiedMessageBody, clazz);
+        if(properties.getHeaders() != null && properties.getHeaders().containsKey(COMPRESSION_TYPE)) {
+            log.info("Uncompressed message : {}", message);
+        }
+        return message;
     }
 
 }

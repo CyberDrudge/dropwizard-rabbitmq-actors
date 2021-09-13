@@ -20,8 +20,8 @@ public class MessageBodyHelper {
     public byte[] decompressMessage(final byte[] message,
                                     final AMQP.BasicProperties properties) throws IOException {
 
-        log.info("Compressed message size: {}", message.length);
         if (properties.getHeaders() != null && properties.getHeaders().containsKey(COMPRESSION_TYPE)) {
+            log.info("Compressed message size: {}", message.length);
             val body = compressionProvider.decompress(message, (CompressionAlgorithm) properties.getHeaders()
                     .get(COMPRESSION_TYPE));
             log.info("Uncompressed message size: {}", body.length);
@@ -33,8 +33,8 @@ public class MessageBodyHelper {
     public byte[] compressMessage(final byte[] message,
                                   final AMQP.BasicProperties properties) throws IOException {
 
-        log.info("Uncompressed message size: {}", message.length);
         if (properties.getHeaders() != null && properties.getHeaders().containsKey(COMPRESSION_TYPE)) {
+            log.info("Uncompressed message size: {}", message.length);
             val body = compressionProvider.compress(message, (CompressionAlgorithm) properties.getHeaders()
                     .get(COMPRESSION_TYPE));
             log.info("Compressed message size: {}", body.length);
