@@ -76,22 +76,10 @@
         </developer>
      </developers>
 
-    <ciManagement>
-        <system>Travis CI</system>
-        <url>https://travis-ci.org/santanusinha/dropwizard-rabbitmq-actors</url>
-    </ciManagement>
-
-    <distributionManagement>
-        <repository>
-            <id>phonepe-releases</id>
-            <url>https://artifactory.phonepe.com/content/repository/releases</url>
-        </repository>
-        <snapshotRepository>
-            <id>phonepe-snapshots</id>
-            <url>https://artifactory.phonepe.com/content/repository/snapshots</url>
-        </snapshotRepository>
-
-    </distributionManagement>
+<!--    <ciManagement>-->
+<!--        <system>Travis CI</system>-->
+<!--        <url>https://travis-ci.org/santanusinha/dropwizard-rabbitmq-actors</url>-->
+<!--    </ciManagement>-->
 
 
     <properties>
