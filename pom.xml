@@ -4,12 +4,6 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <artifactId>pp-parent-pom</artifactId>
-        <groupId>com.phonepe</groupId>
-        <version>0.88</version>
-    </parent>
-
     <groupId>io.appform.dropwizard.actors</groupId>
     <artifactId>dropwizard-rabbitmq-actors</artifactId>
     <version>2.0.28-8-ss-spy-SNAPSHOT</version>
@@ -86,6 +80,18 @@
 <!--        <system>Travis CI</system>-->
 <!--        <url>https://travis-ci.org/santanusinha/dropwizard-rabbitmq-actors</url>-->
 <!--    </ciManagement>-->
+
+    <distributionManagement>
+        <repository>
+            <id>phonepe-releases</id>
+            <url>https://artifactory.phonepe.com/repository/releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>phonepe-snapshots</id>
+            <url>https://artifactory.phonepe.com/repository/snapshots</url>
+        </snapshotRepository>
+
+    </distributionManagement>
 
 
     <properties>
