@@ -17,6 +17,7 @@
 
 package io.appform.dropwizard.actors.connectivity;
 
+import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.health.HealthCheck;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -31,6 +32,9 @@ import io.appform.dropwizard.actors.TtlConfig;
 import io.appform.dropwizard.actors.actor.ActorConfig;
 import io.appform.dropwizard.actors.base.utils.NamingUtils;
 import io.appform.dropwizard.actors.config.RMQConfig;
+import io.appform.dropwizard.actors.metrics.PublishMetricObserver;
+import io.appform.dropwizard.actors.observers.RMQPublishObserver;
+import io.appform.dropwizard.actors.observers.TerminalObserver;
 import io.dropwizard.lifecycle.Managed;
 import io.dropwizard.setup.Environment;
 import lombok.Getter;
@@ -42,8 +46,10 @@ import javax.net.ssl.SSLContext;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.KeyStore;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -58,6 +64,10 @@ public class RMQConnection implements Managed {
     private final TtlConfig ttlConfig;
     private Connection connection;
     private Channel channel;
+
+    private final List<RMQPublishObserver> observers = new ArrayList<>();
+    @Getter
+    private RMQPublishObserver rootObserver;
 
 
     public RMQConnection(final String name,
@@ -129,6 +139,7 @@ public class RMQConnection implements Managed {
             }
         });
         channel = connection.createChannel();
+        setupObservers(config, environment.metrics());
         environment.healthChecks().register(String.format("rmqconnection-%s-%s", connection, UUID.randomUUID()), healthcheck());
         log.info(String.format("Started RMQ connection [%s] ", name));
     }
@@ -249,4 +260,24 @@ public class RMQConnection implements Managed {
         }
     }
 
+    public final void registerObserver(final RMQPublishObserver observer) {
+        if (null == observer) {
+            return;
+        }
+        this.observers.add(observer);
+        log.info("Registered observer: " + observer.getClass().getSimpleName());
+    }
+
+    private void setupObservers(final RMQConfig config,
+                                final MetricRegistry metricRegistry) {
+        //Terminal observer calls the actual method
+        rootObserver = new TerminalObserver();
+        for (var observer : observers) {
+            if (null == observer) {
+                return;
+            }
+            this.rootObserver = observer.setNext(rootObserver);
+        }
+        this.rootObserver = new PublishMetricObserver(config, metricRegistry).setNext(rootObserver);
+    }
 }
