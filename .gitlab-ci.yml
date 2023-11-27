@@ -7,7 +7,7 @@
   tags:
     - backend-docker-large
 
-image: docker.phonepe.com:5000/pp-maven:3.8.4-openjdk-17
+image: docker.phonepe.com:5000/pp-maven:3.8.4-openjdk-8
 
 stages:
   - build
@@ -37,14 +37,15 @@ build_snapshot:
   <<: *default
   <<: *default_tag
   script:
-    - mvn clean package -DskipTests=true -Dmaven.install.skip=true
+    - mvn -U clean package -DskipTests=true -Dmaven.install.skip=true
 
 deploy_snapshot:
   stage: deploy
   <<: *default
   <<: *default_tag
   script:
-    - mvn deploy -DskipTests=true -Pdocker -Dmaven.install.skip=true
+    - export MAVEN_OPTS="-Xms3g -Xmx3g"
+    - mvn -U clean package deploy -Pdocker -DskipTests=true -Dmaven.install.skip=true
   allow_failure: false
   when: manual
 
