@@ -99,6 +99,7 @@ public class UnmanagedPublisher<Message> {
     }
 
     public final void publish(final Message message, final AMQP.BasicProperties properties, final String operation) throws Exception {
+        log.info("Publishing message");
         String routingKey;
         if (config.isSharded()) {
             routingKey = NamingUtils.getShardedQueueName(queueName, getShardId());
@@ -109,8 +110,11 @@ public class UnmanagedPublisher<Message> {
         observer.execute(context, () -> {
             val enrichedProperties = getEnrichedProperties(properties);
             try {
+                log.info("Publishing with routingKey: {}", routingKey);
                 publishChannel.basicPublish(config.getExchange(), routingKey, enrichedProperties, mapper().writeValueAsBytes(message));
+                log.info("Published with routingKey: {}", routingKey);
             } catch (IOException e) {
+                log.error("Error while publishing: {}", e);
                 e.printStackTrace();
             }
             return null;

@@ -54,7 +54,9 @@ public class ConnectionRegistry implements Managed {
                     environment, ttlConfig);
             try {
                 rmqConnection.start();
+                log.info("Started rmq connection - [{}]", connection);
             } catch (Exception e) {
+                log.error("Error while starting connection: {}", e);
                 throw RabbitmqActorException.propagate(e);
             }
             log.info(String.format("Created new RMQ connection with name [%s]", connection));

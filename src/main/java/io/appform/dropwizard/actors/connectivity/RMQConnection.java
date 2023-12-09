@@ -279,5 +279,6 @@ public class RMQConnection implements Managed {
             this.rootObserver = observer.setNext(rootObserver);
         }
         this.rootObserver = new PublishMetricObserver(config, metricRegistry).setNext(rootObserver);
+        log.info("Root observer is {}", this.rootObserver);
     }
 }

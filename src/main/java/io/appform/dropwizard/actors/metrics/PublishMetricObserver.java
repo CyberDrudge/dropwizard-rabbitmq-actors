@@ -40,7 +40,9 @@ public class PublishMetricObserver extends RMQPublishObserver {
         metricData.getTotal().mark();
         val timer = metricData.getTimer().time();
         try {
+            log.info("Proceeding with context: {}", context);
             val response = proceed(context, supplier);
+            log.info("Proceed executed with context: {}", context);
             metricData.getSuccess().mark();
             return response;
         } catch (Throwable t) {
