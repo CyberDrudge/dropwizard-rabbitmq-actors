@@ -33,9 +33,10 @@ public class PublishMetricObserver extends RMQPublishObserver {
 
     @Override
     public <T> T execute(PublishObserverContext context, Supplier<T> supplier) {
-        if (!MetricUtil.isMetricApplicable(rmqConfig.getMetricConfig(), context.getQueueName())) {
-            return proceed(context, supplier);
-        }
+        log.info("Executing PublishMetricObserver.execute");
+//        if (!MetricUtil.isMetricApplicable(rmqConfig.getMetricConfig(), context.getQueueName())) {
+//            return proceed(context, supplier);
+//        }
         val metricData = getMetricData(context);
         metricData.getTotal().mark();
         val timer = metricData.getTimer().time();
@@ -46,6 +47,7 @@ public class PublishMetricObserver extends RMQPublishObserver {
             metricData.getSuccess().mark();
             return response;
         } catch (Throwable t) {
+            log.error("Caught exception in PublishMetricObserver.execute");
             metricData.getFailed().mark();
             throw t;
         } finally {
