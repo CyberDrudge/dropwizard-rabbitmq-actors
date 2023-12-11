@@ -3,6 +3,7 @@ package io.appform.dropwizard.actors.metrics;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.SlidingTimeWindowArrayReservoir;
 import com.codahale.metrics.Timer;
+import io.appform.dropwizard.actors.common.ConsumerOperations;
 import io.appform.dropwizard.actors.common.PublishOperations;
 import io.appform.dropwizard.actors.config.RMQConfig;
 import io.appform.dropwizard.actors.observers.PublishObserverContext;
@@ -12,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.EnumUtils;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -20,14 +20,14 @@ import java.util.function.Supplier;
 
 
 @Slf4j
-public class PublishMetricObserver extends RMQPublishObserver {
+public class ConsumerMetricObserver extends RMQPublishObserver {
     private final RMQConfig rmqConfig;
     private final MetricRegistry metricRegistry;
 
     @Getter
     private final Map<MetricKeyData, MetricData> metricCache = new ConcurrentHashMap<>();
 
-    public PublishMetricObserver(final RMQConfig rmqConfig,
+    public ConsumerMetricObserver(final RMQConfig rmqConfig,
                                  final MetricRegistry metricRegistry) {
         super(null);
         this.rmqConfig = rmqConfig;
@@ -36,22 +36,19 @@ public class PublishMetricObserver extends RMQPublishObserver {
 
     @Override
     public <T> T execute(PublishObserverContext context, Supplier<T> supplier) {
-        log.info("Inside PublishMetricObserver.execute");
-        if (!EnumUtils.isValidEnum(PublishOperations.class, context.getOperation())) {
+        log.info("Inside ConsumerMetricObserver.execute");
+        if (!EnumUtils.isValidEnum(ConsumerOperations.class, context.getOperation())) {
             return proceed(context, supplier);
         }
-        log.info("Executing PublishMetricObserver.execute");
+        log.info("Executing ConsumerMetricObserver.execute");
         val metricData = getMetricData(context);
         metricData.getTotal().mark();
         val timer = metricData.getTimer().time();
         try {
-            log.info("Proceeding with context: {}", context);
             val response = proceed(context, supplier);
-            log.info("Proceed executed with context: {}", context);
             metricData.getSuccess().mark();
             return response;
         } catch (Throwable t) {
-            log.error("Caught exception in PublishMetricObserver.execute");
             metricData.getFailed().mark();
             throw t;
         } finally {
