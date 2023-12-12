@@ -11,7 +11,7 @@ import io.appform.dropwizard.actors.base.utils.NamingUtils;
 import io.appform.dropwizard.actors.common.PublishOperations;
 import io.appform.dropwizard.actors.connectivity.RMQConnection;
 import io.appform.dropwizard.actors.observers.PublishObserverContext;
-import io.appform.dropwizard.actors.observers.RMQPublishObserver;
+import io.appform.dropwizard.actors.observers.RMQObserver;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.RandomUtils;
@@ -32,7 +32,7 @@ public class UnmanagedPublisher<Message> {
     private final RMQConnection connection;
     private final ObjectMapper mapper;
     private final String queueName;
-    private final RMQPublishObserver observer;
+    private final RMQObserver observer;
     private Channel publishChannel;
 
     public UnmanagedPublisher(
@@ -59,7 +59,7 @@ public class UnmanagedPublisher<Message> {
                     .operation(PublishOperations.PUBLISH_WITH_DELAY.name())
                     .queueName(queueName)
                     .build();
-            observer.execute(context, () -> {
+            observer.executePublish(context, () -> {
                 try {
                     publishChannel.basicPublish(ttlExchange(config),
                             queueName,
@@ -107,7 +107,7 @@ public class UnmanagedPublisher<Message> {
             routingKey = queueName;
         }
         val context = PublishObserverContext.builder().operation(operation).queueName(queueName).build();
-        observer.execute(context, () -> {
+        observer.executePublish(context, () -> {
             val enrichedProperties = getEnrichedProperties(properties);
             try {
                 log.info("Publishing with routingKey: {}", routingKey);

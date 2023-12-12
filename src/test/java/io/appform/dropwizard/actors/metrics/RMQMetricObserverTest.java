@@ -14,9 +14,9 @@ import java.util.ArrayList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class PublishMetricObserverTest {
+class RMQMetricObserverTest {
 
-    private PublishMetricObserver publishMetricObserver;
+    private RMQMetricObserver publishMetricObserver;
     private RMQConfig config;
     private final MetricRegistry metricRegistry = new MetricRegistry();;
 
@@ -31,16 +31,16 @@ class PublishMetricObserverTest {
                 .startupGracePeriodSeconds(1)
                 .metricConfig(MetricConfig.builder().enabledForAll(true).build())
                 .build();
-        this.publishMetricObserver = new PublishMetricObserver(config, metricRegistry);
+        this.publishMetricObserver = new RMQMetricObserver(config, metricRegistry);
     }
 
     @Test
     void testExecuteWhenMetricNotApplicable() {
         val config = this.config;
         config.setMetricConfig(MetricConfig.builder().enabledForAll(false).build());
-        val publishMetricObserver = new PublishMetricObserver(config, metricRegistry);
+        val publishMetricObserver = new RMQMetricObserver(config, metricRegistry);
         assertEquals(terminate(),
-                publishMetricObserver.execute(PublishObserverContext.builder().build(), this::terminate));
+                publishMetricObserver.executePublish(PublishObserverContext.builder().build(), this::terminate));
     }
 
     @Test
@@ -49,7 +49,7 @@ class PublishMetricObserverTest {
                 .operation(PublishOperations.PUBLISH.name())
                 .queueName("default")
                 .build();
-        assertEquals(terminate(), publishMetricObserver.execute(context, this::terminate));
+        assertEquals(terminate(), publishMetricObserver.executePublish(context, this::terminate));
         val key = MetricKeyData.builder().operation(context.getOperation()).queueName(context.getQueueName()).build();
         validateMetrics(publishMetricObserver.getMetricCache().get(key), 1, 0);
     }
@@ -60,7 +60,7 @@ class PublishMetricObserverTest {
                 .operation(PublishOperations.PUBLISH.name())
                 .queueName("default")
                 .build();
-        assertThrows(RuntimeException.class, () -> publishMetricObserver.execute(context, this::terminateWithException));
+        assertThrows(RuntimeException.class, () -> publishMetricObserver.executePublish(context, this::terminateWithException));
         val key = MetricKeyData.builder().operation(context.getOperation()).queueName(context.getQueueName()).build();
         validateMetrics(publishMetricObserver.getMetricCache().get(key), 0, 1);
     }
