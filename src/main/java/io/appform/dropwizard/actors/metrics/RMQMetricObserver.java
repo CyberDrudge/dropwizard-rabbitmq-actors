@@ -33,11 +33,11 @@ public class RMQMetricObserver extends RMQObserver {
 
     @Override
     public <T> T executePublish(PublishObserverContext context, Supplier<T> supplier) {
-        log.info("Inside ConsumerMetricObserver.execute");
+        log.info("Inside ConsumerMetricObserver.executePublish");
         if (!MetricUtil.isMetricApplicable(rmqConfig.getMetricConfig(), context.getQueueName())) {
             return proceedPublish(context, supplier);
         }
-        log.info("Executing ConsumerMetricObserver.execute");
+        log.info("Executing ConsumerMetricObserver.executePublish");
         val metricData = getMetricData(context);
         metricData.getTotal().mark();
         val timer = metricData.getTimer().time();
@@ -55,9 +55,11 @@ public class RMQMetricObserver extends RMQObserver {
 
     @Override
     public <T> T executeConsume(PublishObserverContext context, Supplier<T> supplier) {
+        log.info("Inside ConsumerMetricObserver.executeConsume");
         if (!MetricUtil.isMetricApplicable(rmqConfig.getMetricConfig(), context.getQueueName())) {
             return proceedConsume(context, supplier);
         }
+        log.info("Executing ConsumerMetricObserver.executeConsume");
         val metricData = getMetricData(context);
         metricData.getTotal().mark();
         val timer = metricData.getTimer().time();
