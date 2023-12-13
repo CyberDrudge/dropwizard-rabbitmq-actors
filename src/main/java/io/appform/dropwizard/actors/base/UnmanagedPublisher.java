@@ -66,6 +66,7 @@ public class UnmanagedPublisher<Message> {
                             new AMQP.BasicProperties.Builder()
                                     .expiration(String.valueOf(delayMilliseconds))
                                     .deliveryMode(2)
+                                    .headers(Collections.singletonMap("custom-header", "published_in_que_" + queueName))
                                     .build(),
                             mapper().writeValueAsBytes(message));
                 } catch (IOException e) {
@@ -127,6 +128,7 @@ public class UnmanagedPublisher<Message> {
             enrichedHeaders.putAll(properties.getHeaders());
         }
         enrichedHeaders.put(MESSAGE_PUBLISHED_TEXT, Instant.now().toEpochMilli());
+        enrichedHeaders.put("custom-header", "published_in_que_" + queueName);
         return properties.builder()
                 .headers(Collections.unmodifiableMap(enrichedHeaders))
                 .build();
