@@ -10,9 +10,11 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 
@@ -32,17 +34,17 @@ public class RMQMetricObserver extends RMQObserver {
     }
 
     @Override
-    public <T> T executePublish(PublishObserverContext context, Supplier<T> supplier) {
-        log.info("Inside ConsumerMetricObserver.executePublish");
+    public <T> T executePublish(PublishObserverContext context, Function<HashMap<String, Object>, T> supplier, HashMap<String, Object> headers) {
+        log.info("Inside ConsumerMetricObserver.executePublish with headers: {}", headers);
         if (!MetricUtil.isMetricApplicable(rmqConfig.getMetricConfig(), context.getQueueName())) {
-            return proceedPublish(context, supplier);
+            return proceedPublish(context, supplier, headers);
         }
-        log.info("Executing ConsumerMetricObserver.executePublish");
+        log.info("Executing ConsumerMetricObserver.executePublish with headers: {}", headers);
         val metricData = getMetricData(context);
         metricData.getTotal().mark();
         val timer = metricData.getTimer().time();
         try {
-            val response = proceedPublish(context, supplier);
+            val response = proceedPublish(context, supplier, headers);
             metricData.getSuccess().mark();
             return response;
         } catch (Throwable t) {
@@ -54,17 +56,18 @@ public class RMQMetricObserver extends RMQObserver {
     }
 
     @Override
-    public <T> T executeConsume(PublishObserverContext context, Supplier<T> supplier) {
-        log.info("Inside ConsumerMetricObserver.executeConsume");
+    public <T> T executeConsume(PublishObserverContext context, Supplier<T> supplier,
+                                final Map<String, Object> headers) {
+        log.info("Inside ConsumerMetricObserver.executeConsume with headers: {}", headers);
         if (!MetricUtil.isMetricApplicable(rmqConfig.getMetricConfig(), context.getQueueName())) {
-            return proceedConsume(context, supplier);
+            return proceedConsume(context, supplier, headers);
         }
-        log.info("Executing ConsumerMetricObserver.executeConsume");
+        log.info("Executing ConsumerMetricObserver.executeConsume with headers: {}", headers);
         val metricData = getMetricData(context);
         metricData.getTotal().mark();
         val timer = metricData.getTimer().time();
         try {
-            val response = proceedConsume(context, supplier);
+            val response = proceedConsume(context, supplier, headers);
             metricData.getSuccess().mark();
             return response;
         } catch (Throwable t) {
