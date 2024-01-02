@@ -1,16 +1,16 @@
 package io.appform.dropwizard.actors.observers;
 
 import lombok.Builder;
+import lombok.Data;
 import lombok.Setter;
-import lombok.Value;
 
 import java.util.Map;
 
-@Value
+@Data
 @Builder
+@Setter
 public class ObserverContext {
     String operation;
     String queueName;
-    @Setter
     Map<String, Object> headers;
 }
