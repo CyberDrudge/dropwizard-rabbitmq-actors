@@ -17,7 +17,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-
+/**
+ * An Observer that ingests queue metrics.
+ */
 @Slf4j
 public class RMQMetricObserver extends RMQObserver {
     private final RMQConfig rmqConfig;

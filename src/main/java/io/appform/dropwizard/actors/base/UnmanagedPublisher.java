@@ -65,7 +65,7 @@ public class UnmanagedPublisher<Message> {
             }
             val context = ObserverContext.builder()
                     .operation(RMQOperation.PUBLISH_WITH_EXPIRY)
-                    .queueName(routingKey)
+                    .queueName(queueName)
                     .build();
             observer.executePublish(context, () -> {
                 try {
