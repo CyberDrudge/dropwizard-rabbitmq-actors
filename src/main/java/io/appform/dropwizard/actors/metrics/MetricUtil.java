@@ -23,7 +23,7 @@ public class MetricUtil {
     }
 
     public String getMetricPrefix(final MetricKeyData metricKeyData) {
-        return getMetricPrefix(metricKeyData.getQueueName(), metricKeyData.getOperation());
+        return getMetricPrefix(metricKeyData.getQueueName(), metricKeyData.getOperation().name());
     }
 
     private String getMetricPrefix(String... metricNames) {
