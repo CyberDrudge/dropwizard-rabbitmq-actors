@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.Value;
 
 @Builder
-@Data
 @Value
 public class MetricKeyData {
     String queueName;

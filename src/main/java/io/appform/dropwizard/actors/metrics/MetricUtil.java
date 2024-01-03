@@ -7,7 +7,7 @@ import lombok.val;
 @UtilityClass
 public class MetricUtil {
 
-    private static final String RMQ_PREFIX = "rmq_spy_";
+    private static final String RMQ_PREFIX = "rmq_spy.actor";
     private static final String DELIMITER = ".";
     private static final String DELIMITER_REPLACEMENT = "_";
 

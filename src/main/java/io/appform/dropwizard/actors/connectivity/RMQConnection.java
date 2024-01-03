@@ -62,7 +62,6 @@ public class RMQConnection implements Managed {
     private Connection connection;
     private Channel channel;
 
-    private final List<RMQObserver> observers = new ArrayList<>();
     @Getter
     private final RMQObserver rootObserver;
 
@@ -71,7 +70,8 @@ public class RMQConnection implements Managed {
                          final RMQConfig config,
                          final ExecutorService executorService,
                          final Environment environment,
-                         final TtlConfig ttlConfig, RMQObserver rootObserver) {
+                         final TtlConfig ttlConfig,
+                         final RMQObserver rootObserver) {
         this.name = name;
         this.config = config;
         this.executorService = executorService;
