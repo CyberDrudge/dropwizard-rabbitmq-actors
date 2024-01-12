@@ -4,17 +4,16 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.SlidingTimeWindowArrayReservoir;
 import com.codahale.metrics.Timer;
 import io.appform.dropwizard.actors.config.RMQConfig;
-import io.appform.dropwizard.actors.observers.ObserverContext;
+import io.appform.dropwizard.actors.observers.ConsumeObserverContext;
+import io.appform.dropwizard.actors.observers.PublishObserverContext;
 import io.appform.dropwizard.actors.observers.RMQObserver;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -36,12 +35,10 @@ public class RMQMetricObserver extends RMQObserver {
     }
 
     @Override
-    public <T> T executePublish(final ObserverContext context, final Supplier<T> supplier) {
-        log.info("Inside RMQMetricObserver.executePublish with context: {}", context);
+    public <T> T executePublish(final PublishObserverContext context, final Supplier<T> supplier) {
         if (!MetricUtil.isMetricApplicable(rmqConfig.getMetricConfig(), context.getQueueName())) {
             return proceedPublish(context, supplier);
         }
-        log.info("Executing RMQMetricObserver.executePublish with context: {}", context);
         val metricData = getMetricData(context);
         metricData.getTotal().mark();
         val timer = metricData.getTimer().time();
@@ -58,35 +55,66 @@ public class RMQMetricObserver extends RMQObserver {
     }
 
     @Override
-    public <T> T executeConsume(ObserverContext context,
-                                Supplier<T> supplier) {
-        log.info("Inside RMQMetricObserver.executeConsume with context: {}", context);
+    public <T> T executeConsume(final ConsumeObserverContext context, final Supplier<T> supplier) {
         if (!MetricUtil.isMetricApplicable(rmqConfig.getMetricConfig(), context.getQueueName())) {
             return proceedConsume(context, supplier);
         }
-        log.info("Executing RMQMetricObserver.executeConsume with context: {}", context);
+        val isRedelivered = context.isRedelivered();
         val metricData = getMetricData(context);
+        val metricDataForRedelivery = isRedelivered ? getMetricDataForRedelivery(context) : null;
         metricData.getTotal().mark();
+        if (isRedelivered) {
+            metricDataForRedelivery.getTotal().mark();
+        }
         val timer = metricData.getTimer().time();
+        val redeliveryTimer =  isRedelivered ? metricDataForRedelivery.getTimer().time(): null;
         try {
             val response = proceedConsume(context, supplier);
             metricData.getSuccess().mark();
+            if (isRedelivered) {
+                metricDataForRedelivery.getSuccess().mark();
+            }
             return response;
         } catch (Throwable t) {
             metricData.getFailed().mark();
+            if (isRedelivered) {
+                metricDataForRedelivery.getFailed().mark();
+            }
             throw t;
         } finally {
             timer.stop();
+            if (isRedelivered) {
+                redeliveryTimer.stop();
+            }
         }
     }
 
-    private MetricData getMetricData(final ObserverContext context) {
+    private MetricData getMetricData(final PublishObserverContext context) {
         val metricKeyData = MetricKeyData.builder()
                 .queueName(context.getQueueName())
                 .operation(context.getOperation())
                 .build();
         return metricCache.computeIfAbsent(metricKeyData, key ->
                 getMetricData(MetricUtil.getMetricPrefix(metricKeyData)));
+    }
+
+    private MetricData getMetricData(final ConsumeObserverContext context) {
+        val metricKeyData = MetricKeyData.builder()
+                .queueName(context.getQueueName())
+                .operation(context.getOperation())
+                .build();
+        return metricCache.computeIfAbsent(metricKeyData, key ->
+                getMetricData(MetricUtil.getMetricPrefix(metricKeyData)));
+    }
+
+    private MetricData getMetricDataForRedelivery(final ConsumeObserverContext context) {
+        val metricKeyData = MetricKeyData.builder()
+                .queueName(context.getQueueName())
+                .operation(context.getOperation())
+                .redelivered(context.isRedelivered())
+                .build();
+        return metricCache.computeIfAbsent(metricKeyData, key ->
+                getMetricData(MetricUtil.getMetricPrefixForRedelivery(metricKeyData)));
     }
 
     private MetricData getMetricData(final String metricPrefix) {

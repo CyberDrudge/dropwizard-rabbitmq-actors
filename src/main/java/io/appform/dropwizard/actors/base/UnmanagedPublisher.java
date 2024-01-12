@@ -11,7 +11,7 @@ import io.appform.dropwizard.actors.base.utils.NamingUtils;
 import io.appform.dropwizard.actors.common.RMQOperation;
 import io.appform.dropwizard.actors.common.RabbitmqActorException;
 import io.appform.dropwizard.actors.connectivity.RMQConnection;
-import io.appform.dropwizard.actors.observers.ObserverContext;
+import io.appform.dropwizard.actors.observers.PublishObserverContext;
 import io.appform.dropwizard.actors.observers.RMQObserver;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -49,10 +49,6 @@ public class UnmanagedPublisher<Message> {
         this.observer = connection.getRootObserver();
     }
 
-    private String getRoutingKey() {
-        return config.isSharded() ? NamingUtils.getShardedQueueName(queueName, getShardId()) : queueName;
-    }
-
     public final void publishWithDelay(final Message message, final long delayMilliseconds) throws Exception {
         log.info("Publishing message to exchange with delay: {}", delayMilliseconds);
         if (!config.isDelayed()) {
@@ -60,9 +56,9 @@ public class UnmanagedPublisher<Message> {
         }
 
         if (config.getDelayType() == DelayType.TTL) {
-            String routingKey = getRoutingKey();
-            val context = ObserverContext.builder()
-                    .operation(RMQOperation.PUBLISH_WITH_EXPIRY)
+            val routingKey = getRoutingKey();
+            val context = PublishObserverContext.builder()
+                    .operation(RMQOperation.PUBLISH)
                     .queueName(queueName)
                     .build();
             observer.executePublish(context, () -> {
@@ -84,7 +80,7 @@ public class UnmanagedPublisher<Message> {
             publish(message, new AMQP.BasicProperties.Builder()
                     .headers(Collections.singletonMap("x-delay", delayMilliseconds))
                     .deliveryMode(2)
-                    .build(), RMQOperation.PUBLISH_WITH_DELAY);
+                    .build());
         }
     }
 
@@ -98,23 +94,23 @@ public class UnmanagedPublisher<Message> {
                     .headers(ImmutableMap.of(MESSAGE_EXPIRY_TEXT, expiresAt))
                     .build();
         }
-        publish(message, properties, RMQOperation.PUBLISH_WITH_EXPIRY);
+        publish(message, properties);
     }
 
     public final void publish(final Message message) throws Exception {
-        publish(message, MessageProperties.MINIMAL_PERSISTENT_BASIC, RMQOperation.PUBLISH);
+        publish(message, MessageProperties.MINIMAL_PERSISTENT_BASIC);
     }
 
-    public final void publish(final Message message, final AMQP.BasicProperties properties, final RMQOperation operation) throws Exception {
-        log.info("Publishing message");
-        String routingKey = getRoutingKey();
-        val context = ObserverContext.builder().operation(operation).queueName(queueName).build();
+    public final void publish(final Message message, final AMQP.BasicProperties properties) throws Exception {
+        val routingKey = getRoutingKey();
+        val context = PublishObserverContext.builder()
+                .operation(RMQOperation.PUBLISH)
+                .queueName(queueName)
+                .build();
         observer.executePublish(context, () -> {
             val enrichedProperties = getEnrichedProperties(properties);
             try {
-                log.info("Publishing with queueName: {} - enrichedProperties: {}", queueName, enrichedProperties);
                 publishChannel.basicPublish(config.getExchange(), routingKey, enrichedProperties, mapper().writeValueAsBytes(message));
-                log.info("Published for queueName: {} - enrichedProperties: {}", queueName, enrichedProperties);
             } catch (IOException e) {
                 log.error("Error while publishing: {}", e);
                 throw RabbitmqActorException.propagate(e);
@@ -257,5 +253,9 @@ public class UnmanagedPublisher<Message> {
 
     protected final ObjectMapper mapper() {
         return mapper;
+    }
+
+    private String getRoutingKey() {
+        return config.isSharded() ? NamingUtils.getShardedQueueName(queueName, getShardId()) : queueName;
     }
 }
