@@ -99,11 +99,9 @@
         <dropwizard.version>2.0.28</dropwizard.version>
         <lombok.version>1.18.26</lombok.version>
         <guava.version>31.0.1-jre</guava.version>
-        <test.container.version>1.0.6</test.container.version>
         <okhttp.version>4.9.3</okhttp.version>
         <amqp-client.version>5.20.0</amqp-client.version>
         <mockito.version>4.4.0</mockito.version>
-        <junit.version>4.13.2</junit.version>
     </properties>
 
     <dependencyManagement>
@@ -192,15 +190,9 @@
             <version>2.10.5</version>
         </dependency>
         <dependency>
-            <groupId>io.appform.testcontainer</groupId>
-            <artifactId>junit-testcontainer-commons</artifactId>
-            <version>${test.container.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.appform.testcontainer</groupId>
-            <artifactId>junit-testcontainer-rabbitmq</artifactId>
-            <version>${test.container.version}</version>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>rabbitmq</artifactId>
+            <version>1.18.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -231,6 +223,12 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
             <version>5.8.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>5.8.1</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
