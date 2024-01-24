@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
+import java.lang.Thread;
 
 import static io.appform.dropwizard.actors.common.Constants.MESSAGE_EXPIRY_TEXT;
 import static io.appform.dropwizard.actors.common.Constants.MESSAGE_PUBLISHED_TEXT;
@@ -76,6 +77,7 @@ public class Handler<Message> extends DefaultConsumer {
                 .queueName(queueName)
                 .redelivered(messageMetadata.isRedelivered())
                 .build();
+        Thread.sleep(1900000);
         return observer.executeConsume(context, () -> {
             try {
                 return expired
