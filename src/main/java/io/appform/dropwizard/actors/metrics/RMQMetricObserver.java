@@ -38,10 +38,13 @@ public class RMQMetricObserver extends RMQObserver {
 
     @Override
     public <T> T executePublish(final PublishObserverContext context, final Supplier<T> supplier) {
+        log.info("--- Inside executePublish ---");
         if (!MetricUtil.isMetricApplicable(rmqConfig.getMetricConfig(), context.getQueueName())) {
             return proceedPublish(context, supplier);
         }
+        log.info("--- Executing executePublish ---");
         val metricData = getMetricData(context);
+        log.info("--- Publishing metrics for context:{} with metric:{}---", context, metricData);
         metricData.getTotal().mark();
         val timer = metricData.getTimer().time();
         try {
@@ -58,12 +61,16 @@ public class RMQMetricObserver extends RMQObserver {
 
     @Override
     public <T> T executeConsume(final ConsumeObserverContext context, final Supplier<T> supplier) {
+        log.info("--- Inside executeConsume ---");
         if (!MetricUtil.isMetricApplicable(rmqConfig.getMetricConfig(), context.getQueueName())) {
             return proceedConsume(context, supplier);
         }
+        log.info("--- Executing executeConsume ---");
         val isRedelivered = context.isRedelivered();
         val metricData = getMetricData(context);
+        log.info("--- Publishing metrics for context:{} with metric:{}---", context, metricData);
         val metricDataForRedelivery = isRedelivered ? getMetricDataForRedelivery(context) : null;
+        log.info("--- Publishing metrics for context:{} with metricRedelivery:{}---", context, metricDataForRedelivery);
         metricData.getTotal().mark();
         if (metricDataForRedelivery != null) {
             metricDataForRedelivery.getTotal().mark();
