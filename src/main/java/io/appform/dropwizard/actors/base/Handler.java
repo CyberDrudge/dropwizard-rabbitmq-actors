@@ -77,7 +77,9 @@ public class Handler<Message> extends DefaultConsumer {
                 .queueName(queueName)
                 .redelivered(messageMetadata.isRedelivered())
                 .build();
-        Thread.sleep(1900000);
+        if (!messageMetadata.isRedelivered()){
+            Thread.sleep(1900000);
+        }
         return observer.executeConsume(context, () -> {
             try {
                 return expired
